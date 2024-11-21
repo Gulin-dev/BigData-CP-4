@@ -1,25 +1,25 @@
 CREATE TABLE ST.GUEG_SALARY_HIST (
-    PERSON VARCHAR(255),
-    CLASS VARCHAR(255),
-    SALARY DECIMAL(10, 2),
-    EFFECTIVE_FROM DATE,
-    EFFECTIVE_TO DATE
+    gueg_person VARCHAR(50),
+    gueg_class VARCHAR(50),
+    gueg_salary INT,
+    gueg_effective_from DATE,
+    gueg_effective_to DATE
 );
 
-INSERT INTO ST.GUEG_SALARY_HIST (PERSON, CLASS, SALARY, EFFECTIVE_FROM, EFFECTIVE_TO)
+INSERT INTO ST.GUEG_SALARY_HIST (gueg_person, gueg_class, gueg_salary, gueg_effective_from, gueg_effective_to)
 SELECT 
-    PERSON,
-    CLASS,
-    SALARY,
-    EFFECTIVE_FROM,
-    LEAD(EFFECTIVE_FROM, 1, '9999-12-31') OVER (PARTITION BY PERSON ORDER BY EFFECTIVE_FROM) - INTERVAL '1 DAY' AS EFFECTIVE_TO
+    "person" AS gueg_person,
+    "class" AS gueg_class,
+    "salary" AS gueg_salary,
+    "effective_from" AS gueg_effective_from,
+    LEAD("effective_from", 1, '9999-12-31') OVER (PARTITION BY "person" ORDER BY "effective_from") - INTERVAL '1 DAY' AS gueg_effective_to
 FROM (
     SELECT 
-        PERSON,
-        CLASS,
-        SALARY,
-        EFFECTIVE_FROM,
-        ROW_NUMBER() OVER (PARTITION BY PERSON ORDER BY EFFECTIVE_FROM) AS rn
+        "person",
+        "class",
+        "salary",
+        "effective_from",
+        ROW_NUMBER() OVER (PARTITION BY "person" ORDER BY "effective_from") AS rn
     FROM DE.HISTGROUP
 ) AS subquery
-WHERE rn = 1 OR SALARY != LAG(SALARY) OVER (PARTITION BY PERSON ORDER BY EFFECTIVE_FROM);
+WHERE rn = 1 OR "salary" != LAG("salary") OVER (PARTITION BY "person" ORDER BY "effective_from");
